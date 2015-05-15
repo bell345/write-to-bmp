@@ -8,11 +8,14 @@
 #include "main.h"
 #include <sstream>
 #include <stdarg.h>
+#include <sys/time.h>
 
 template <typename T>
 const char* to_string(T input);
 
-long sinceStart();
+void startTiming();
+extern struct timeval prog_start_time;
+double sinceStart();
 
 void customLog(std::string format, ...);
 void reportError(std::string errorMessage, ...);

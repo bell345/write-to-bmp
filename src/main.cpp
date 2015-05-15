@@ -1,6 +1,32 @@
 #include "main.h"
 #include "util.h"
 
+struct BITMAPFILEHEADER {
+    char type[2];
+    char size[4];
+    char reserved[4];
+    char offBits[4];
+};
+struct BITMAPINFOHEADER {
+    char size[4] = {0, 0, 0, 0x28};
+    char width[4];
+    char height[4];
+    char planes[2];
+    char bitCount[2];
+    char compression[4];
+    char sizeImage[4];
+    char xPxPerMetre[4];
+    char yPxPerMetre[4];
+    char coloursUsed[4];
+    char importantColour[4];
+};
+
+int writeToBMP() {
+    BITMAPFILEHEADER head;
+
+    return 0;
+};
+
 /**
  * Opens a file at fileName for access through standard C I/O.
  * @param fileName The directory path + filename of the file to open.
@@ -18,7 +44,8 @@ FILE* openFile(const char* fileName, const char* restrictions) {
 }
 
 int main(int argc, char** argv) {
-    customLog("Yay!");
+    BITMAPFILEHEADER head;
+    startTiming();
 
     FILE* file = openFile("/doesntexist.txt", "r");
     if (file != NULL) fclose(file);

@@ -4,6 +4,8 @@
 
 #include "util.h"
 
+struct timeval prog_start_time;
+
 template <typename T>
 const char* to_string(T input) {
     std::stringstream ss;
@@ -11,15 +13,24 @@ const char* to_string(T input) {
     return ss.str().c_str();
 };
 
-long sinceStart() {
-    auto currtime = hresclock::now();
-    return std::chrono::duration_cast<std::chrono::nanoseconds>(currtime - starttime).count();
+void startTiming() {
+    gettimeofday(&prog_start_time, NULL);
+}
+
+double sinceStart() {
+    struct timeval currtime;
+    const int us_in_ms = (int)1e3; // microseconds in a millisecond
+    const int ms_in_s = (int)1e3;  // milliseconds in a second
+
+    gettimeofday(&currtime, NULL);
+    return ((double)currtime.tv_usec        / (us_in_ms) + currtime.tv_sec        * ms_in_s) -
+           ((double)prog_start_time.tv_usec / (us_in_ms) + prog_start_time.tv_sec * ms_in_s);
 };
 
 void customLog(std::string format, ...) {
     va_list va; va_start(va, format);
 
-    printf("[%s] ", to_string(sinceStart()));
+    printf("[%ldms] ", long(sinceStart()));
     vprintf(format.c_str(), va);
     printf("\n");
 
@@ -31,7 +42,7 @@ void reportError(std::string errorMessage, ...) {
 
     errorMessage = "An error occured: " + errorMessage;
 
-    fprintf(stderr, "[%s] ", to_string(sinceStart()));
+    fprintf(stderr, "[%ldms] ", long(sinceStart()));
     vfprintf(stderr, errorMessage.c_str(), va);
     fprintf(stderr, ": \n\t%s\n", strerror(errno));
 
