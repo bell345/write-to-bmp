@@ -3,7 +3,9 @@
 
 #include <iostream>
 #include <string.h>
+#include <fstream>
 #include <stdio.h>
+#include <vector>
 
 using std::cout;
 using std::endl;

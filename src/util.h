@@ -8,7 +8,12 @@
 #include "main.h"
 #include <sstream>
 #include <stdarg.h>
+#include <stdint.h>
+#ifdef _WIN32
+#include <Windows.h>
+#else
 #include <sys/time.h>
+#endif
 
 template <typename T>
 const char* to_string(T input);

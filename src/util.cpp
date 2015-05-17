@@ -13,6 +13,26 @@ const char* to_string(T input) {
     return ss.str().c_str();
 };
 
+#ifdef _WIN32
+// from http://stackoverflow.com/a/26085827
+int gettimeofday(timeval* tp, void* tz) {
+    static const uint64_t EPOCH = uint64_t(116444736000000000ULL);
+
+    FILETIME   filetime;
+    SYSTEMTIME systime;
+    uint64_t   time;
+
+    GetSystemTime(&systime);
+    SystemTimeToFileTime(&systime, &filetime);
+    time =  uint64_t(filetime.dwLowDateTime);
+    time += uint64_t(filetime.dwHighDateTime) << 32;
+
+    tp->tv_sec  = long((time - EPOCH) / 10000000L);
+    tp->tv_usec = long(systime.wMilliseconds * 1000);
+    return 0;
+}
+#endif
+
 void startTiming() {
     gettimeofday(&prog_start_time, NULL);
 }
@@ -44,7 +64,9 @@ void reportError(std::string errorMessage, ...) {
 
     fprintf(stderr, "[%ldms] ", long(sinceStart()));
     vfprintf(stderr, errorMessage.c_str(), va);
-    fprintf(stderr, ": \n\t%s\n", strerror(errno));
+    char errBuf[512];
+    strerror_s(errBuf, errno);
+    fprintf(stderr, ": \n\t%s\n", errBuf);
 
     va_end(va);
 };
