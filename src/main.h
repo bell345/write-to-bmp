@@ -6,8 +6,13 @@
 #include <fstream>
 #include <stdio.h>
 #include <vector>
+#include <math.h>
 
 using std::cout;
 using std::endl;
+
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_WARNINGS
+#endif
 
 #endif

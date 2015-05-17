@@ -2,6 +2,12 @@
 #include "util.h"
 
 #ifdef _MSC_VER
+#define PACK_STRUCT
+#else
+#define PACK_STRUCT __attribute__((__packed__))
+#endif
+
+#ifdef _MSC_VER
 #include <pshpack2.h>
 #endif
 
@@ -15,7 +21,7 @@ struct BMPFileHeader {
         fwrite(&type[0], sizeof(uint8_t), 2, f);
         fwrite(&size, sizeof(uint32_t), 3, f);
     }
-};
+} PACK_STRUCT;
 
 #ifdef _MSC_VER
 #include <poppack.h>
@@ -76,19 +82,41 @@ BMPInfoHeader::BMPInfoHeader() {
     size = sizeof(BMPInfoHeader);
 };
 
-int writeToBMP(const int width, const int height) {
+static void* __memcpy(void* dest, const void* src, const size_t srcCount) {
+    #ifdef _MSC_VER
+    return memcpy_s(dest, srcCount, src, srcCount);
+    #else
+    return memcpy(dest, src, srcCount);
+    #endif
+};
+static FILE* __fopen(const char* filename, const char* restrictions) {
+    #ifdef _MSC_VER
+    FILE* f;
+    fopen_s(&f, filename, restrictions);
+    return f;
+    #else
+    return fopen(filename, restrictions);
+    #endif
+}
+
+int writeToBMP(const uint32_t width, const uint32_t height) {
     BMPFile bmp = BMPFile(width, height);
     bmp.info.width = width;
     bmp.info.height = height;
 
     const size_t rowLength = (size_t)ceil((float)(width * sizeof(BMPColour)) / 4) * 4;
-    bmp.head.size = sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + rowLength * height;
+    bmp.head.size = uint32_t(sizeof(BMPFileHeader) + sizeof(BMPInfoHeader) + rowLength * height);
 
     for (int i = 0; i < height; i++) {
         std::vector<BMPColour> colours;
         for (int j = 0; j < width; j++)
-            colours.push_back(BMPColour(rand() % 255, rand() % 255, rand() % 255));
-        memcpy_s(&bmp.bitmapData[i*rowLength], colours.size()*sizeof(BMPColour), colours.data(), colours.size()*sizeof(BMPColour));
+            colours.push_back(BMPColour(uint8_t(rand() % 255),
+                                        uint8_t(rand() % 255),
+                                        uint8_t(rand() % 255)
+            ));
+        __memcpy(&bmp.bitmapData[i*rowLength],
+                 colours.data(),
+                 rowLength);
     };
 
     cout << sizeof(bmp.head) << endl;
@@ -97,42 +125,25 @@ int writeToBMP(const int width, const int height) {
         printf("0x%x\n", *ptr);
     }
 
-    /*FILE* f;
-    fopen_s(&f, "test.bmp", "w");
+    FILE* f = __fopen("test.bmp", "w");
     if (f != NULL) {
         bmp.head.write(f);
         bmp.info.write(f);
-        cout << rowLength * height << endl;
-        fwrite(&bmp.bitmapData, sizeof(uint8_t), rowLength * height, f);
+        fwrite(&bmp.bitmapData[0], sizeof(uint8_t), rowLength * height, f);
         fclose(f);
-    }*/
-    std::fstream f;
+    }
+    /*std::fstream f;
     f.open("test.bmp", std::ios::out);
     f.write(reinterpret_cast<char*>(&bmp.head), sizeof(bmp.head));
     f.write(reinterpret_cast<char*>(&bmp.info), sizeof(bmp.info));
     f.write(reinterpret_cast<char*>(&bmp.bitmapData), rowLength * height);
-    f.close();
+    f.close();*/
 
     return 0;
 };
 
-/**
- * Opens a file at fileName for access through standard C I/O.
- * @param fileName The directory path + filename of the file to open.
- * @param restrictions An array of flag characters that indicate the restrictions on using the FILE object.
- * Examples include 'r' for read-only and 'rw' for read-write only.
- */
-FILE* openFile(const char* fileName, const char* restrictions) {
-    FILE* file;
-    fopen_s(&file, fileName, restrictions);
-    if (file == NULL) {
-        reportError("The file %s could not be opened due to", fileName);
-        return file;
-    }
-    return file;
-}
-
 int main(int argc, char** argv) {
+    srand((unsigned int)time(NULL));
     startTiming();
 
     writeToBMP(20, 20);

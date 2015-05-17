@@ -57,6 +57,16 @@ void customLog(std::string format, ...) {
     va_end(va);
 }
 
+static char* __strerror(int errnum) {
+    #ifdef _MSC_VER
+    char errBuf[512];
+    strerror_s(errBuf, errnum);
+    return errBuf;
+    #else
+    return strerror(errnum);
+    #endif
+}
+
 void reportError(std::string errorMessage, ...) {
     va_list va; va_start(va, errorMessage);
 
@@ -64,9 +74,7 @@ void reportError(std::string errorMessage, ...) {
 
     fprintf(stderr, "[%ldms] ", long(sinceStart()));
     vfprintf(stderr, errorMessage.c_str(), va);
-    char errBuf[512];
-    strerror_s(errBuf, errno);
-    fprintf(stderr, ": \n\t%s\n", errBuf);
+    fprintf(stderr, ": \n\t%s\n", __strerror(errno));
 
     va_end(va);
 };
