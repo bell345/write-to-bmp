@@ -84,7 +84,8 @@ BMPInfoHeader::BMPInfoHeader() {
 
 static void* __memcpy(void* dest, const void* src, const size_t srcCount) {
     #ifdef _MSC_VER
-    return memcpy_s(dest, srcCount, src, srcCount);
+    memcpy_s(dest, srcCount, src, srcCount);
+    return (void*)0;
     #else
     return memcpy(dest, src, srcCount);
     #endif
