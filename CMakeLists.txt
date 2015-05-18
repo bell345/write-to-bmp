@@ -3,6 +3,6 @@ project(write-to-bmp)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} --std=c++11)
 
-set(SOURCE_FILES src/main)
+set(SOURCE_FILES src/writer src/logutil src/crosscrtrepl src/bmpformat)
 
-add_executable(write-to-bmp ${SOURCE_FILES} src/util.h src/util.cpp)
+add_executable(write-to-bmp ${SOURCE_FILES})

@@ -7,6 +7,13 @@
 #define USE_CXX_FILESTREAMS false
 #endif
 
+int writeToBMP(BMPFile* bmp, const char* filename) {
+    FILE* f = __fopen(filename, "w");
+    bmp->write(f);
+    fclose(f);
+    return 0;
+};
+
 int writeToBMP(const uint32_t width, const uint32_t height) {
     customLog("Writing new BMP file of dimensions %i x %i", width, height);
     BMPFile bmp = BMPFile(width, height);
@@ -52,7 +59,19 @@ int main(int argc, char** argv) {
     srand((unsigned)time(NULL));
     startTiming();
 
-    writeToBMP(255, 255);
+    //writeToBMP(255, 255);
+    BMPFile bmp(255, 255);
+    for (unsigned i=0;i<bmp.height;i++) {
+        std::vector<BMPColour> colours;
+        for (unsigned j=0;j<bmp.width;j++)
+            colours.push_back(BMPColour(
+                    uint8_t(rand() % 255),
+                    uint8_t(rand() % 255),
+                    uint8_t(rand() % 255)
+            ));
+        bmp.addRow(i, colours);
+    }
+    writeToBMP(&bmp, "test2.bmp");
     customLog("Finished!");
     printf("Press any key to continue...");
     std::cin.get();
