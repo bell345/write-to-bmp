@@ -110,7 +110,7 @@ public:
     void addRow(const size_t rowNum, std::vector<BMPColour> colours, bool reverse) {
         size_t row = min(rowNum, height);
         if (reverse) row = (height - 1) - row;
-        const size_t copynum = min(colours.size(), rowLength);
+        const size_t copynum = min(colours.size() * sizeof(BMPColour), rowLength);
         __memcpy(&bitmapData[min(row, height) * rowLength], colours.data(), copynum);
     };
     /**
@@ -126,7 +126,7 @@ public:
     void write(FILE* f) {
         head.write(f);
         info.write(f);
-        fwrite(reinterpret_cast<char*>(&bitmapData[0]), sizeof(uint8_t), rowLength*height, f);
+        fwrite(&bitmapData[0], sizeof(uint8_t), rowLength*height, f);
     };
     ~BMPFile() { delete[] bitmapData; };
 };
