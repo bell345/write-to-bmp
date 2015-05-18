@@ -2,7 +2,7 @@
 // Created by thomas on 2015-05-14.
 //
 
-#include "util.h"
+#include "logutil.h"
 
 struct timeval prog_start_time;
 
@@ -55,16 +55,6 @@ void customLog(std::string format, ...) {
     printf("\n");
 
     va_end(va);
-}
-
-static char* __strerror(int errnum) {
-    #ifdef _MSC_VER
-    char errBuf[512];
-    strerror_s(errBuf, errnum);
-    return errBuf;
-    #else
-    return strerror(errnum);
-    #endif
 }
 
 void reportError(std::string errorMessage, ...) {

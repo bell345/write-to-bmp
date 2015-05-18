@@ -5,7 +5,8 @@
 #ifndef WRITE_TO_BMP_UTIL_H
 #define WRITE_TO_BMP_UTIL_H
 
-#include "main.h"
+#include <iostream>
+#include <stdio.h>
 #include <sstream>
 #include <stdarg.h>
 #include <stdint.h>
@@ -14,6 +15,7 @@
 #else
 #include <sys/time.h>
 #endif
+#include "crosscrtrepl.h"
 
 template <typename T>
 const char* to_string(T input);

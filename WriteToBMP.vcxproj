@@ -150,12 +150,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\util.cpp" />
+    <ClCompile Include="src\crosscrtrepl.cpp" />
+    <ClCompile Include="src\writer.cpp" />
+    <ClCompile Include="src\logutil.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\main.h" />
-    <ClInclude Include="src\util.h" />
+    <ClInclude Include="src\bmpformat.h" />
+    <ClInclude Include="src\crosscrtrepl.h" />
+    <ClInclude Include="src\writer.h" />
+    <ClInclude Include="src\logutil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
