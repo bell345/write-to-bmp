@@ -97,7 +97,7 @@ static FILE* __fopen(const char* filename, const char* restrictions) {
     #else
     return fopen(filename, restrictions);
     #endif
-}
+};
 
 int writeToBMP(const uint32_t width, const uint32_t height) {
     BMPFile bmp = BMPFile(width, height);
@@ -146,7 +146,7 @@ int main(int argc, char** argv) {
     srand((unsigned int)time(NULL));
     startTiming();
 
-    writeToBMP(20, 20);
+    writeToBMP(255, 255);
 
     return 0;
 }
