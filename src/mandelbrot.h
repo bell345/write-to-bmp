@@ -24,7 +24,8 @@ namespace FractalGen {
     const double HSV_SATURATION = 1.0;
     const double HSV_VALUE = 0.5;
 
-    const double FACTOR = 170;
+    const double QUERY_WIDTH = 0.8;
+    const double QUERY_HEIGHT = 0.8;
     const double PAN_X = -0.8;
     const double PAN_Y = -0.8;
 
@@ -67,19 +68,25 @@ namespace FractalGen {
     std::vector<std::vector<Colour3LT> > calculateMandelbrot(const unsigned width, const unsigned height) {
         std::vector<std::vector<Colour3LT> > grid;
 
-        for (unsigned i=0;i<height;i++) {
+        for (unsigned y = 0; y < height; y++) {
             std::vector<Colour3LT> row;
-            for (unsigned j=0;j<width;j++) {
-                long result = testComplexJuliaFate(complex_t(j/FACTOR + PAN_X, i/FACTOR + PAN_Y));
+            for (unsigned x = 0; x < width; x++) {
+                long result = testComplexJuliaFate(complex_t(
+                    ((double)x / width)  * QUERY_WIDTH  + PAN_X, 
+                    ((double)y / height) * QUERY_HEIGHT + PAN_Y));
+
                 if (result == -1) row.push_back(Colour3LT(0, 0, 0));
                 else {
-                    int hue = int(long(result * HUE_SPREAD) + HUE_OFFSET % 360);
-
+                    int hue = int(long((double)result * HUE_SPREAD) + HUE_OFFSET % 360);
                     row.push_back(hsvToRgb<Colour3LT>(hue, HSV_SATURATION, HSV_VALUE));
                 }
-            };
+
+                int progress = (((double)y / height) + ((double)x / (width*height))) * 100;
+                printf("\r\t[%3i%%] Last result: %-3i", progress, result);
+            }
             grid.push_back(row);
-        };
+        }
+        cout << "\r\t[100%] Last result:    \n";
 
         return grid;
     };

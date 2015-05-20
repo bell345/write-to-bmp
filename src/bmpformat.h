@@ -8,11 +8,15 @@
 
 #include "crosscrtrepl.h"
 
+#ifndef min
 template <typename T>
 T min(T a, T b) { return a < b ? a : b; }
+#endif
 
+#ifndef max
 template <typename T>
 T max(T a, T b) { return a > b ? a : b; }
+#endif
 
 #ifdef _MSC_VER
 #define PACK_STRUCT
@@ -117,7 +121,7 @@ public:
      * @param colours A std::vector of BMPColours that represents the pixel values of that row
      * @param reverse Whether or not to treat the index as from top to bottom (true) or from bottom to top, like stored in the BMP file (false)
      */
-    void assignRow(const size_t rowNum, std::vector<BMPColour> colours, bool reverse) {
+    void assignRow(const size_t rowNum, std::vector<BMPColour> colours, bool reverse = false) {
         size_t row = min(rowNum, height);
         if (reverse) row = (height - 1) - row;
         const size_t copynum = min(colours.size() * sizeof(BMPColour), rowLength);
@@ -128,15 +132,9 @@ public:
      * Bounds checking is automatically done in assignRow().
      * @param colourMatrix A vector of bitmap rows, which are themselves vectors of BMPColours
      */
-    void setBitmap(std::vector<std::vector<BMPColour> > colourMatrix) {
-        for (unsigned i=0;i<colourMatrix.size();i++) assignRow(i, colourMatrix[i]);
+    void setBitmap(std::vector<std::vector<BMPColour> > colourMatrix, bool reverse = false) {
+        for (unsigned i=0;i<min(colourMatrix.size(), height);i++) assignRow(i, colourMatrix[i], reverse);
     };
-    /**
-     * Assigns a new bitmap row to the BMPFile from a std::vector of BMPColours.
-     * @param rowNum The index of the row you want to assign
-     * @param colours A std::vector of BMPColours that represents the pixel values of that row
-     */
-    void assignRow(const size_t rowNum, std::vector<BMPColour> colours) { assignRow(rowNum, colours, false); }
     /**
      * Writes a BMPFile to a given C I/O FILE* stream.
      * @param f The FILE* stream that the file will be written to.

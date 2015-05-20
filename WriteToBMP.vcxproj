@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClInclude Include="src\bmpformat.h" />
     <ClInclude Include="src\crosscrtrepl.h" />
+    <ClInclude Include="src\mandelbrot.h" />
     <ClInclude Include="src\writer.h" />
     <ClInclude Include="src\logutil.h" />
   </ItemGroup>
