@@ -55,7 +55,7 @@ void customLog(std::string format, ...) {
     printf("\n");
 
     va_end(va);
-}
+};
 
 void reportError(std::string errorMessage, ...) {
     va_list va; va_start(va, errorMessage);
@@ -68,3 +68,23 @@ void reportError(std::string errorMessage, ...) {
 
     va_end(va);
 };
+
+void fullWidthLogWithReturn(std::string format, ...) {
+    va_list va; va_start(va, format);
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    int columns;
+
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+    columns = csbi.srWindow.Right - csbi.srWindow.Left;
+
+    char* line = new char[columns + 1];
+    int writtenCharacters = vsprintf_s(&line[0], columns, format.c_str(), va);
+    memset(&line[writtenCharacters], ' ', columns - writtenCharacters);
+    memset(&line[columns], 0, 1);
+
+    printf("\r%s", line);
+
+    delete[] line;
+    va_end(va);
+}

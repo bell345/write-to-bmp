@@ -14,6 +14,7 @@
 #include <Windows.h>
 #else
 #include <sys/time.h>
+#include <sys/ioctl.h>
 #endif
 #include "crosscrtrepl.h"
 
@@ -26,5 +27,6 @@ double sinceStart();
 
 void customLog(std::string format, ...);
 void reportError(std::string errorMessage, ...);
+void fullWidthLogWithReturn(std::string format, ...);
 
 #endif //WRITE_TO_BMP_UTIL_H
