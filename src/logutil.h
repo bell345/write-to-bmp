@@ -15,6 +15,7 @@
 #else
 #include <sys/time.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 #endif
 #include "crosscrtrepl.h"
 

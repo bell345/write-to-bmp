@@ -72,15 +72,28 @@ void reportError(std::string errorMessage, ...) {
 void fullWidthLogWithReturn(std::string format, ...) {
     va_list va; va_start(va, format);
 
+    #ifdef _WIN32
+
     CONSOLE_SCREEN_BUFFER_INFO csbi;
-    int columns;
 
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
-    columns = csbi.srWindow.Right - csbi.srWindow.Left;
+    size_t columns = size_t(csbi.srWindow.Right - csbi.srWindow.Left);
+
+    #else
+
+    struct winsize w;
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    size_t columns = w.ws_col;
+
+    if (columns == 0) columns = 80;
+
+    #endif
 
     char* line = new char[columns + 1];
-    int writtenCharacters = vsprintf_s(&line[0], columns, format.c_str(), va);
-    memset(&line[writtenCharacters], ' ', columns - writtenCharacters);
+    if (format.size() > columns) format = format.substr(0, columns);
+    int writtenCharacters = __vsprintf(&line[0], columns, format.c_str(), va);
+    memset(&line[writtenCharacters], ' ', size_t(columns - writtenCharacters));
     memset(&line[columns], 0, 1);
 
     printf("\r%s", line);
