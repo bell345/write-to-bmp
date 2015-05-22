@@ -27,4 +27,12 @@ char* __strerror(int errnum) {
 #else
     return strerror(errnum);
 #endif
-}
+};
+
+int __vsprintf(char* dest, size_t maxLength, const char* format, va_list va) {
+#ifdef _MSC_VER
+    return vsprintf_s(dest, maxLength, format, va);
+#else
+    return vsprintf(dest, format, va);
+#endif
+};

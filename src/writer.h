@@ -9,6 +9,10 @@
 #include <math.h>
 #include <ctime>
 
+#ifdef __GNUC__
+#include <getopt.h>
+#endif
+
 using std::cout;
 using std::endl;
 
