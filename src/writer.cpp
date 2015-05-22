@@ -24,11 +24,9 @@ int writeToBMP(BMPFile* bmp, const char* filename) {
         printf("This file (%s) already exists. Are you sure you want to overwrite this file? (Y/N): ", filename);
         char result[2];
         std::cin.getline(&result[0], 2);
+        fclose(existTest);
 
-        if (result[0] == 'N' || result[0] == 'n') {
-            fclose(existTest);
-            return ECANCELED;
-        }
+        if (result[0] == 'N' || result[0] == 'n') return ECANCELED;
     }
     FILE* f = __fopen(filename, "w");
     if (f != NULL) {

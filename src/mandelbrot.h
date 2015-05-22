@@ -70,8 +70,8 @@ namespace FractalGen {
 
         double start = sinceStart();
         double lastTime = sinceStart();
-        double fpanX = PAN_X + (QUERY_WIDTH / 2);
-        double fpanY = PAN_Y + (QUERY_HEIGHT / 2);
+        double fpanX = PAN_X - (QUERY_WIDTH / 2);
+        double fpanY = PAN_Y - (QUERY_HEIGHT / 2);
         int timer = 0, timerLimit = 1000;
 
         for (unsigned y = 0; y < height; y++) {
