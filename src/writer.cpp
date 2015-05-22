@@ -66,7 +66,7 @@ int main(int argc, char** argv) {
     }
     #endif
 
-    BMPFile bmp(64, 64);
+    BMPFile bmp(512, 512);
     customLog("Declared new BMP file (%i x %i)", bmp.width, bmp.height);
     customLog("Generating new Mandelbrot Set\n(%f x %f, offset at %f, %f)...", 
         FractalGen::QUERY_WIDTH,
@@ -83,10 +83,10 @@ int main(int argc, char** argv) {
         printf("Enter a filename: ");
         std::cin.getline(filenameBuf, 512);
 
-        filename = strdup(filenameBuf);
+        filename = __strdup(filenameBuf);
     }
 
-    if (strlen(filename) < 1) filename = strdup("fractal.bmp");
+    if (strlen(filename) < 1) filename = __strdup("fractal.bmp");
 
     int res = writeToBMP(&bmp, filename);
 

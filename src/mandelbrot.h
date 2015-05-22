@@ -27,7 +27,7 @@ namespace FractalGen {
     const double QUERY_WIDTH = 2;
     const double QUERY_HEIGHT = 2;
     const double PAN_X = -0.75;
-    const double PAN_Y = -0.5;
+    const double PAN_Y = 0;
 
     typedef std::complex<double> complex_t;
 

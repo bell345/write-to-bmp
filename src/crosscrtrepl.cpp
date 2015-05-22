@@ -36,3 +36,11 @@ int __vsprintf(char* dest, size_t maxLength, const char* format, va_list va) {
     return vsprintf(dest, format, va);
 #endif
 };
+
+char* __strdup(const char* source) {
+#ifdef _MSC_VER
+    return _strdup(source);
+#else
+    return strdup(source);
+#endif
+};
