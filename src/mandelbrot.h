@@ -69,8 +69,10 @@ namespace FractalGen {
         std::vector<std::vector<Colour3LT> > grid;
 
         double start = sinceStart();
+        double lastTime = sinceStart();
         double fpanX = PAN_X + (QUERY_WIDTH / 2);
         double fpanY = PAN_Y + (QUERY_HEIGHT / 2);
+        int timer = 0, timerLimit = 1000;
 
         for (unsigned y = 0; y < height; y++) {
             std::vector<Colour3LT> row;
@@ -84,11 +86,17 @@ namespace FractalGen {
                         int(long((double)result * HUE_SPREAD) + HUE_OFFSET % 360),
                         HSV_SATURATION, 
                         HSV_VALUE));
+                double currTime = sinceStart();
+                timer += currTime - lastTime;
+                lastTime = currTime;
+                if (timer > timerLimit) {
+                    timer = 0;
 
-                double progress = ((double)y / height) + ((double)x / (width*height));
-                double duration = sinceStart() - start;
-                fullWidthLogWithReturn("[%3i%%] Last result: %-3i; %2i seconds remaining...",
-                    int(progress * 100), result, int((duration / progress) * (1 - progress)) / 1000);
+                    double progress = ((double)y / height) + ((double)x / (width*height));
+                    double duration = sinceStart() - start;
+                    fullWidthLogWithReturn("[%3i%%] Last result: %-3i; %2i seconds remaining...",
+                        int(progress * 100), result, int((duration / progress) * (1 - progress)) / 1000);
+                }
             }
             grid.push_back(row);
         }
