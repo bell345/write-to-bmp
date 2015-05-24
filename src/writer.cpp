@@ -44,6 +44,7 @@ int writeToBMP(BMPFile* bmp, const char* filename, bool force = false) {
 
 int main(int argc, char** argv) {
     std::vector<std::vector<BMPColour> > matrix;
+    FractalGen::FractalSettings fracset;
 
     // declaring the variables that can be set with CLI arguments
     // arranging stuff into columns is so satisfying
@@ -52,8 +53,8 @@ int main(int argc, char** argv) {
     bool     debug        = false;
     unsigned width        = 512;
     unsigned height       = 512;
-    double   xoffset      = FractalGen::fracset.pan_x;
-    double   yoffset      = FractalGen::fracset.pan_y;
+    double   xoffset      = fracset.pan_x;
+    double   yoffset      = fracset.pan_y;
     double   zoom         = -0.5;
 
     #ifdef _GETOPT_H
@@ -89,20 +90,20 @@ int main(int argc, char** argv) {
 
     startTiming(debug);
 
-    FractalGen::fracset.query_x = 1/pow(10, zoom);
-    FractalGen::fracset.query_y = 1/pow(10, zoom);
-    FractalGen::fracset.pan_x = xoffset;
-    FractalGen::fracset.pan_y = yoffset;
+    fracset.query_x = 1/pow(10, zoom);
+    fracset.query_y = 1/pow(10, zoom);
+    fracset.pan_x = xoffset;
+    fracset.pan_y = yoffset;
     BMPFile bmp(width, height);
 
     customLog("Declared new BMP file (%i x %i)", bmp.width, bmp.height);
     customLog("Generating new Mandelbrot Set\n(%f x %f, offset at %f, %f)...", 
-        FractalGen::fracset.query_x,
-        FractalGen::fracset.query_y,
-        FractalGen::fracset.pan_x,
-        FractalGen::fracset.pan_y);
+        fracset.query_x,
+        fracset.query_y,
+        fracset.pan_x,
+        fracset.pan_y);
 
-    matrix = FractalGen::calculateMandelbrot<BMPColour>((unsigned)bmp.width, (unsigned)bmp.height);
+    matrix = FractalGen::calculateMandelbrot<BMPColour>((unsigned)bmp.width, (unsigned)bmp.height, fracset);
 
     customLog("Generated fractal! Now assigning to bitmap...");
     bmp.setBitmap(matrix, true);

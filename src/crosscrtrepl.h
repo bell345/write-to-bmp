@@ -1,6 +1,11 @@
 #ifndef WRITE_TO_BMP_CROSSCRTREPL_H
 #define WRITE_TO_BMP_CROSSCRTREPL_H
 
+/** crosscrtrepl.h
+ * A magical file for getting around MSVC++'s warnings about not using _s functions.
+ * I probably shouldn't be using C style I/O and string ops anyway, but this was easier.
+ */
+
 #include <stdio.h>
 #include <string.h>
 
