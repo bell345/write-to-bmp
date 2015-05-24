@@ -11,6 +11,7 @@
 
 #ifdef __GNUC__
 #include <getopt.h>
+#include <errno.h>
 #endif
 
 using std::cout;

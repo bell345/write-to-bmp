@@ -22,7 +22,7 @@
 template <typename T>
 const char* to_string(T input);
 
-void startTiming();
+void startTiming(bool debug);
 extern struct timeval prog_start_time;
 double sinceStart();
 

@@ -16,29 +16,31 @@
 #include <vector>
 
 namespace FractalGen {
-    const double PLANE_BOUNDARY = 100;
-    const long   ITERATION_LIMIT = 600;
+    struct FractalSettings {
+        double plane_boundary = 600;
+        long   iteration_limit = 600;
 
-    const double HUE_SPREAD = (double)1/4;
-    const long   HUE_OFFSET = 190;
-    const double HSV_SATURATION = 1.0;
-    const double HSV_VALUE = 0.5;
+        double hue_spread = 1.0/2.1;
+        long   hue_offset = 140;
+        double hsv_saturation = 1.0;
+        double hsv_value = 0.8;
 
-    const double QUERY_WIDTH = 2;
-    const double QUERY_HEIGHT = 2;
-    const double PAN_X = -0.75;
-    const double PAN_Y = 0;
+        double query_x = 2;
+        double query_y = 2;
+        double pan_x = -0.75;
+        double pan_y = 0;
+    } fracset;
 
     typedef std::complex<double> complex_t;
 
     bool isBounded(complex_t cmp) {
         if (isinf(cmp.real()) || isinf(cmp.imag()) || isnan(cmp.real()) || isnan(cmp.imag())) return false;
-        return fabs(cmp.imag()) < PLANE_BOUNDARY || fabs(cmp.real()) < PLANE_BOUNDARY;
+        return fabs(cmp.imag()) < fracset.plane_boundary || fabs(cmp.real()) < fracset.plane_boundary;
     };
 
     long testComplexJuliaFate(const complex_t juliaOffset) {
         complex_t fate(0, 0);
-        for (unsigned long i=0;i<ITERATION_LIMIT;i++) {
+        for (unsigned long i=0;i<fracset.iteration_limit;i++) {
             fate = fate * fate + juliaOffset;
             if (!isBounded(fate)) return i;
         }
@@ -66,40 +68,38 @@ namespace FractalGen {
 
     template <typename Colour3LT>
     std::vector<std::vector<Colour3LT> > calculateMandelbrot(const unsigned width, const unsigned height) {
-        std::vector<std::vector<Colour3LT> > grid;
+        std::vector<std::vector<Colour3LT> > grid(height, std::vector<Colour3LT>(width, Colour3LT(0, 0, 0)));
 
-        double start = sinceStart();
-        double lastTime = sinceStart();
-        double fpanX = PAN_X - (QUERY_WIDTH / 2);
-        double fpanY = PAN_Y - (QUERY_HEIGHT / 2);
-        int timer = 0, timerLimit = 1000;
+        double start = sinceStart(), lastTime = sinceStart();
+        double fpanX = fracset.pan_x - (fracset.query_x / 2);
+        double fpanY = fracset.pan_y - (fracset.query_y / 2);
+        const int timerLimit = 20;
 
+        #pragma omp parallel for
         for (unsigned y = 0; y < height; y++) {
             std::vector<Colour3LT> row;
             for (unsigned x = 0; x < width; x++) {
                 long result = testComplexJuliaFate(complex_t(
-                    ((double)x / width)  * QUERY_WIDTH  + fpanX,
-                    ((double)y / height) * QUERY_HEIGHT + fpanY));
+                        ((double)x / width)  * fracset.query_x + fpanX,
+                        ((double)y / height) * fracset.query_y + fpanY));
 
                 if (result == -1) row.push_back(Colour3LT(0, 0, 0));
                 else row.push_back(hsvToRgb<Colour3LT>(
-                        int(long((double)result * HUE_SPREAD) + HUE_OFFSET % 360),
-                        HSV_SATURATION, 
-                        HSV_VALUE));
-                double currTime = sinceStart();
-                timer += currTime - lastTime;
-                lastTime = currTime;
-                if (timer > timerLimit) {
-                    timer = 0;
+                            int(360 - long((double)result * fracset.hue_spread + fracset.hue_offset) % 360),
+                            fracset.hsv_saturation,
+                            fracset.hsv_value));
+                if (sinceStart() - lastTime > timerLimit) {
+                    lastTime = sinceStart();
 
                     double progress = ((double)y / height) + ((double)x / (width*height));
                     double duration = sinceStart() - start;
                     fullWidthLogWithReturn("[%3i%%] Last result: %-3i; %2i seconds remaining...",
-                        int(progress * 100), result, int((duration / progress) * (1 - progress)) / 1000);
+                                           int(progress * 100), result, int((duration / progress) * (1 - progress)) / 1000);
                 }
             }
-            grid.push_back(row);
+            if (y < grid.size()) grid.at(y) = row;
         }
+
         fullWidthLogWithReturn("[100%%] Complete");
         printf("\n");
 

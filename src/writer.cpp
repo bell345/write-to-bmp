@@ -12,21 +12,23 @@ const char* copyright =
                 "For more information, visit http://opensource.org/licenses/MIT";
 
 void bailUsage(const char* exeName) {
-    printf("\nUsage:\n %s [-o <FILENAME>] [--output=<FILENAME>]\n", exeName);
-    printf(" %s [-h] [--help]\n\n", exeName);
+    printf("\nUsage:\n %s [-df] [-o <FILENAME>] [-w <WIDTH>] [-h <HEIGHT>] [-z <ZOOM>]\n", exeName);
+    printf(" %s [--help]\n\n", exeName);
     printf("%s", copyright);
     exit(EXIT_FAILURE);
 };
 
-int writeToBMP(BMPFile* bmp, const char* filename) {
-    FILE* existTest = __fopen(filename, "r");
-    if (existTest != NULL) {
-        printf("This file (%s) already exists. Are you sure you want to overwrite this file? (Y/N): ", filename);
-        char result[2];
-        std::cin.getline(&result[0], 2);
-        fclose(existTest);
+int writeToBMP(BMPFile* bmp, const char* filename, bool force = false) {
+    if (!force) {
+        FILE* existTest = __fopen(filename, "r");
+        if (existTest != NULL) {
+            printf("This file (%s) already exists. Are you sure you want to overwrite this file? (Y/N): ", filename);
+            char result[2];
+            std::cin.getline(&result[0], 2);
+            fclose(existTest);
 
-        if (result[0] == 'N' || result[0] == 'n') return ECANCELED;
+            if (result[0] == 'N' || result[0] == 'n') return ECANCELED;
+        }
     }
     FILE* f = __fopen(filename, "w");
     if (f != NULL) {
@@ -41,52 +43,72 @@ int writeToBMP(BMPFile* bmp, const char* filename) {
 };
 
 int main(int argc, char** argv) {
-    srand((unsigned)time(NULL));
-    startTiming();
-
     std::vector<std::vector<BMPColour> > matrix;
-    char* filename = "";
+
+    // declaring the variables that can be set with CLI arguments
+    // arranging stuff into columns is so satisfying
+    char*    filename     = __strdup("fractal.bmp");
+    bool     forceWriting = false;
+    bool     debug        = false;
+    unsigned width        = 512;
+    unsigned height       = 512;
+    double   xoffset      = FractalGen::fracset.pan_x;
+    double   yoffset      = FractalGen::fracset.pan_y;
+    double   zoom         = -0.5;
 
     #ifdef _GETOPT_H
-    struct option opts[2] = {
-            {"help", 0, NULL, 'h'},
-            {"output", 1, NULL, 'o'}
+    // the CLI long options
+    struct option opts[9] = {
+            // long option, using a parameter?, flags, short option
+            {"help",    no_argument,       NULL, '\0'},
+            {"output",  required_argument, NULL,  'o'},
+            {"force",   no_argument,       NULL,  'f'},
+            {"debug",   no_argument,       NULL,  'd'},
+            {"width",   required_argument, NULL,  'w'},
+            {"height",  required_argument, NULL,  'h'},
+            {"zoom",    required_argument, NULL,  'z'},
+            {"xoffset", required_argument, NULL,  'x'},
+            {"yoffset", required_argument, NULL,  'y'}
     };
 
     int c;
-    while ((c = getopt_long(argc, argv, "o:", opts, NULL)) != EOF) {
+    while ((c = getopt_long(argc, argv, "o:w:h:x:y:z:fd", opts, NULL)) != EOF) { // keep going until we don't have any more options
         switch (c) {
-            case 'o':
-                filename = strdup(optarg);
-                break;
+            case 'o': filename     = strdup(optarg);         break;
+            case 'f': forceWriting = true;                   break;
+            case 'd': debug        = true;                   break;
+            case 'w': width        = (unsigned)atoi(optarg); break;
+            case 'h': height       = (unsigned)atoi(optarg); break;
+            case 'x': xoffset      = atof(optarg);           break;
+            case 'y': yoffset      = atof(optarg);           break;
+            case 'z': zoom         = atof(optarg);           break;
             default: bailUsage(argv[0]);
         }
     }
     #endif
 
-    BMPFile bmp(512, 512);
+    startTiming(debug);
+
+    FractalGen::fracset.query_x = 1/pow(10, zoom);
+    FractalGen::fracset.query_y = 1/pow(10, zoom);
+    FractalGen::fracset.pan_x = xoffset;
+    FractalGen::fracset.pan_y = yoffset;
+    BMPFile bmp(width, height);
+
     customLog("Declared new BMP file (%i x %i)", bmp.width, bmp.height);
     customLog("Generating new Mandelbrot Set\n(%f x %f, offset at %f, %f)...", 
-        FractalGen::QUERY_WIDTH,
-        FractalGen::QUERY_HEIGHT, 
-        FractalGen::PAN_X, 
-        FractalGen::PAN_Y);
+        FractalGen::fracset.query_x,
+        FractalGen::fracset.query_y,
+        FractalGen::fracset.pan_x,
+        FractalGen::fracset.pan_y);
+
     matrix = FractalGen::calculateMandelbrot<BMPColour>((unsigned)bmp.width, (unsigned)bmp.height);
+
     customLog("Generated fractal! Now assigning to bitmap...");
     bmp.setBitmap(matrix, true);
+
     customLog("Assigned fractal to bitmap. Writing to file...");
-
-    if (strlen(filename) < 1) {
-        char filenameBuf[512];
-        printf("Enter a filename: ");
-        std::cin.getline(filenameBuf, 512);
-
-        filename = __strdup(filenameBuf);
-    }
-
-    if (strlen(filename) < 1) filename = __strdup("fractal.bmp");
-
-    int res = writeToBMP(&bmp, filename);
+    int res = writeToBMP(&bmp, filename, forceWriting);
 
     if (res == 0) customLog("Finished!");
     #ifdef _MSC_VER

@@ -4,6 +4,8 @@
 
 #include "logutil.h"
 
+bool isDebug = false;
+
 struct timeval prog_start_time;
 
 template <typename T>
@@ -33,7 +35,8 @@ int gettimeofday(timeval* tp, void* tz) {
 }
 #endif
 
-void startTiming() {
+void startTiming(bool debug) {
+    isDebug = debug;
     gettimeofday(&prog_start_time, NULL);
 }
 
@@ -48,13 +51,16 @@ double sinceStart() {
 };
 
 void customLog(std::string format, ...) {
-    va_list va; va_start(va, format);
+    if (isDebug) {
+        va_list va;
+        va_start(va, format);
 
-    printf("[%ldms] ", long(sinceStart()));
-    vprintf(format.c_str(), va);
-    printf("\n");
+        printf("[%ldms] ", long(sinceStart()));
+        vprintf(format.c_str(), va);
+        printf("\n");
 
-    va_end(va);
+        va_end(va);
+    }
 };
 
 void reportError(std::string errorMessage, ...) {
@@ -71,25 +77,19 @@ void reportError(std::string errorMessage, ...) {
 
 void fullWidthLogWithReturn(std::string format, ...) {
     va_list va; va_start(va, format);
-
-    #ifdef _WIN32
-
+#ifdef _WIN32
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
     GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     size_t columns = size_t(csbi.srWindow.Right - csbi.srWindow.Left);
-
-    #else
-
+#else
     struct winsize w;
 
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     size_t columns = w.ws_col;
 
     if (columns == 0) columns = 80;
-
-    #endif
-
+#endif
     char* line = new char[columns + 1];
     if (format.size() > columns) format = format.substr(0, columns);
     int writtenCharacters = __vsprintf(&line[0], columns, format.c_str(), va);
